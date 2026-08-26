@@ -1,0 +1,429 @@
+"===COLLECTIONS==="
+
+"==Arrays=="
+array := #(1 2 3 4). #(1 2 3 4) .
+
+array at: 1 put: 42.
+
+array  #(42 2 3 4) .
+
+"array add: 5 y levanta el debugger. Esto es cause de que los Array son de longitud fija y no podemos agregar nuevos elementos una vez instanciado ya que se fija su tamaño".
+array add:  5
+
+"==Ordered Collections=="
+orderedCollection := OrderedCollection with: 4 with: 3 with: 2 with: 1. an OrderedCollection(4 3 2 1) .
+
+orderedCollection add: 42.
+orderedCollection  an OrderedCollection(4 3 2 1 42) .
+
+orderedCollection add: 2.
+orderedCollection  an OrderedCollection(4 3 2 1 42 2) .
+
+"La collección contiene 6 elementos y el dos aparace repetido una vez"
+
+"==Sets=="
+set := Set with: 4 with: 3 with: 2 with: 1.  a Set(4 3 2 1) .
+
+set add: 42.
+
+set a Set(42 4 3 2 1) .
+
+set add: 2
+
+set a Set(42 4 3 2 1) .
+
+"El elemento repetido no se vuelve a agregar al Set"
+
+"==Dictionaries=="
+dictionary := Dictionary new. a Dictionary() .
+
+dictionary add: #a->4; add: #b->3; add: #c->2; add: #d-> 2; yourself. a Dictionary(#b->3 #a->4 #e->42 #d->2 #c->2 ) .
+
+dictionary add: #e->42.
+
+dictionary size 5 .
+"El diccionario tiene 5 asociaciones clave->valor."
+
+dictionary keys  #(#b #a #e #d #c) .
+
+dictionary values  #(3 4 42 2 2) .
+
+dictionary at: #a. 4 .
+
+dictionary at: #z. "Obtenemos un error 'key: #z not found' ya que no existe ninguna clave #z"
+
+"Con el mensaje at:ifAbsent: podemos evitar el error y handlear el caso donde la clave no existe"
+dictionary at: #z ifAbsent: 24.  24 .
+
+"==Conversiones=="
+array asOrderedCollection. an OrderedCollection(1 2 3 4).
+
+array asSet  a Set(4 3 2 1) .
+
+set asArray  #(42 4 3 2 1) .
+
+dictionary asArray  #(3 4 42 2 2) .
+"Al intentar convertir el diccionario en un arreglo, obtendremos solo el arreglo con los valores de cada clave".
+
+"===Colaboraciones==="
+"==Impares=="
+|elements index odds |
+
+elements:= #(1 2 5 6 9).
+
+odds := OrderedCollection new.
+
+index := 1.
+
+[index <= elements size]
+whileTrue: [
+	((elements at: index) odd) ifTrue: [odds add: (elements at: index)].
+	index := index +1.
+	].
+^odds an OrderedCollection(1 5 9) .
+
+ "'Do it' ejecuta el codigo sin más. 'Print it' imprime el resultado en el workspace una vez termina la ejecución. 'Inspect it' abre el explorador sobre el objecto retornado como resultado. 'Explore it' abre el explorador sobre el objecto retornado. 'Debug it' levantar el debugger frenado sobre el punto de inicio del código que se ejecuta para que podamos debuggearlo".
+
+"Esta versión es muy imperativa, poco declarativa y es dificil de leer/entender que es lo que está haciendo. El código tiene embebido la complejidad 'accidental' de tener que manejar el 'como recorrer un arreglo' cuando el proposito original era solo ver que número son impares."
+
+"Versión con do"
+
+|elements odds |
+
+elements:= #(1 2 5 6 9).
+
+odds := OrderedCollection new.
+
+elements do: [ :element |
+	(element odd) ifTrue: [odds add: element].
+	].
+^odds
+
+"En esta version el código es mucho más legible. La complejidad del manejo del recorrido del arreglo quedó 'escondida' detrás de la implementación del mensaje do: Esto no nos hizo perder declaratividad ya que es explicito quien recibe el mensaje y por ende se deduce facilment en una leída rápida que es lo que este mensaje hace."
+
+"Version con select".
+|elements |
+
+elements:= #(1 2 5 6 9).
+
+^elements select: [ :element |
+	element odd
+	].
+
+"Nuevamente mejoramos la declaratividad del código. Aquí logramos que la complejidad de 'extraer elementos de un arreglo que cumplan cierta condición' quede detrás de la implementación del mensaje select: y nuevamente sin perder declaratividad! "
+
+"==Dobles=="
+"While"
+|elements index doubles |
+
+elements:= #(1 2 5).
+
+doubles := OrderedCollection new.
+
+index := 1.
+
+[index <= elements size]
+whileTrue: [
+	doubles add: ((elements at: index) *2).
+	index := index +1.
+	].
+^doubles . an OrderedCollection(2 4 10) .
+
+"Mejoremoslo usando el mensaje do: como hicimos para el ejericio anterior"
+
+|elements doubles |
+
+elements:= #(1 2 5).
+
+doubles := OrderedCollection new.
+
+
+elements do: [ :element |
+	doubles add: element*2.
+	].
+^doubles . an OrderedCollection(2 4 10) .
+
+"Ahora explorando el protocolo de las OrderedCollection veremos que podemos encontrar un mensaje más adecuado que nuevamente nos permita esconder la complejidad de 'obtener un nuevo arreglo con los elementos transformados'. "
+
+|elements  |
+
+elements:= #(1 2 5).
+
+^elements collect: [ :element |
+	element*2.
+	].
+
+"==Par=="
+"While"
+|elements index |
+
+elements:= #(1 2 5 6 9).
+
+index := 1.
+
+[index <= elements size]
+whileTrue: [
+	(elements at: index) even ifTrue: [^elements at: index]. 
+	index := index +1.
+	].
+
+"Do"
+|elements |
+
+elements:= #(1 2 5 6 9).
+
+elements do: [ :element |
+	element even ifTrue: [^element]. 
+	].
+ 2 .
+
+"Find"
+|elements |
+
+elements:= #(1 2 5 6 9).
+
+^elements detect: [ :element |
+	element even
+	]. 2 .
+
+"En el caso de que el elemento no se encuentre en la colleción, el mensaje detect levanta una excepción"
+"Modifiquemos para que la excepción lanzada sea la especificada"
+|elements |
+
+elements:= #(1 5 9).
+
+^elements detect:  [ :element |
+	element even
+	] ifNone: [self error: 'No hay pares'].
+
+"==Suma=="
+"While"
+
+|elements index sum |
+
+elements:= #(1 5 9).
+
+index := 1.
+
+sum := 0.
+
+[index <= elements size]
+whileTrue: [
+	sum:= sum + (elements at: index).
+	index := index +1.
+	].
+^sum.
+
+"Do"
+
+|elements sum |
+
+elements:= #(1 5 9).
+
+sum := 0.
+
+elements do: [ :element |
+	sum:= sum + element.
+	].
+^sum. 15 .
+
+"Con Sum"
+|elements |
+
+elements:= #(1 5 9).
+
+^elements sum. 15 .
+
+"Con Inject:Into:"
+
+|elements|
+
+elements:= #(1 5 9).
+
+^elements inject: 0 into: [:acc :element | acc + element ].
+
+"Inject:into: recibe dos colaboradores: el valor inicial que será injectado y un bloque que indica como se deben ir acumulando los valores a medida que se recorre la colección"
+
+"==Vocales=="
+|elements|
+
+elements := 'abcdefguijp'.
+
+^elements select: [:char | char isVowel ].
+
+"Los string son un subset de colleciones particular, ya que los objetos coleccionados siempre serán characteres, a diferencia de una colección cualquiera que puede tener varios tipos de objetos."
+
+"Estos mensajes podrán haberlos visto en materias como Algo 1, dentro del paradigma imperativo, con el nombre de map, filter y find. También en PLP, dentro del paradigma funcional, con el mismo nombre sumando además foldr como el la versión funcional de inject:into:"
+
+"=== Bloques ==="
+
+2.a
+
+"""Un bloque es un objeto que representa una secuencia diferida de acciones. Está compuesto por una secuencia de expresiones delimitadas por corchetes ([ ]) y separadas por puntos. Las expresiones del bloque no se ejecutan inmediatamente, sino cuando el bloque recibe un mensaje que solicita su ejecución, como value. Los bloques también pueden recibir argumentos"""
+
+[ :a :b |  a + b ] value: 100 value: 5
+
+"=== Symbols ==="
+
+3.a
+
+"""Un Symbol es un objeto que representa una secuencia de caracteres única. El libro distingue los símbolos de los String porque no pueden existir dos símbolos diferentes que tengan exactamente la misma secuencia de caracteres."""
+
+| x y |
+x := #pepe.
+y := #pepe.
+x = y.
+
+"===MEASURES==="
+
+"Evaluar estas colaboraciones"
+
+10*peso + 10*dollar. 
+
+"Esto falla por que faltan paretensis. El objeto resultante de 10*peso+10 recibe el mensaje '*' con colaborador dollar"..
+
+"Evaluar anotando que resultado se cree que se va a obtener"
+
+10*peso + (10*dollar). 
+
+"Se obtiene un objeto CompoundMeasure. Como la unidades son distintas y no relacionadas no se pueden unificar, por lo cual el resultado de está expresion es una medida compuesta entre pesos y dolares."
+
+10*peso+(10*dollar)-(2*dollar).
+
+"La medida compuesta obtenida como resultado de 10*peso+(10*dollar) tiene un componente de dolares, por lo cual al restar 2 dolares se obtiene una nueva CompoundMeasure donde ahora tenemos 8 dolares. Es decir la CompoundMeasure puede resolver la modificación de solo una de las medidas que la componen".
+
+10*peso+(10*dollar)-(2*dollar) - (8*dollar).
+
+"Observa que el resultado acá se convierte en un SimpleMeasure, ya que la segunda componente de nuestra CompoundedMeasure se vió nulificada, por lo tanto quedó solo el peso como unidad no trivial de medida y por ello el objeto pasa a ser un SimpleMeasure"
+
+
+"Que es peso?"
+peso inspect
+
+"Peso es un objeto BaseUnit"
+
+"Que es 10*peso?"
+(10*peso) amount
+(10*peso) unit
+
+"10*peso es una SimpleMeasure que posee dos colaboradores internos que diferencian sus componentes de unidad y cantidad".
+
+"Y que son los numeros en este contexto?"
+
+1 amount.
+1 unit.
+
+"Los numeros no son SimpleMeasures pero saben responder amount y unit. El resultado del primero es trivial, y el segundo retorna un objeto de tipo NullUnit. Es decir los números se comportan como medidas simple sin unidad".
+
+"Cuanto es (10*peso) +1 y 1+(10*peso)?"
+
+(10*peso) +1. 
+1+(10*peso).
+
+"Los numeros se comportan como SimpleMeasure con NullUnit como su component de unidad. Dado que estamos sumando dos SimpleMeasures con unidades distintas obtenemos un CompoundMeasure, exactamente igual que al evaluar 10*peso + 10*dollar."
+
+"Cree el peso nuevamente"
+peso:= BaseUnit nameForOne: 'peso'  nameForMany: 'pesos' sign: $/.
+
+"Como ya vimos el peso es una BaseUnit, por lo tanto para recrearlo utilizamos el mesaje de creación de instancia que nos provee dicha clase".
+
+"Que representa $$?"
+"Evaluar $$ retorna un objeto Character $. El primer $ nos indica que hay un valor literal de un caracter, y el segundo $ es el caracter en sí."
+
+"Calcular (10*metros) + (500*centimetros). "
+
+"Creemos primero una BaseUnit que represente los metros."
+metros := BaseUnit nameForOne: 'metro' nameForMany:  'metros'.
+
+"Los centímetros pueden ser creados en función de los metros. Para ello tenemos la clase ProportionalDerivedUnit, la cual nos permite definir una unidad en base a otra, especificando el factor de conversión, en este caso proporcional".
+
+centimetros := ProportionalDerivedUnit baseUnit: metros conversionFactor: 1/100 nameForOne: 'centimetro' nameForMany: 'centimetros' sign: 'cm'.
+
+(10*metros) + (500*centimetros).
+
+"El resultado de la colaboración de arriba es una SimpleMeasure cuya unidad es metros. Esto lo logramos gracias a que creamos lo centimetros en función de los metros y al hacerlo especificamos como se pasa de una unidad a la otra".
+
+"Resvuelva el problema del cohete Arianne"
+pulgadas := ProportionalDerivedUnit baseUnit: metros conversionFactor: 2.5/100 nameForOne: 'pulgada' nameForMany: 'pulgadas' sign: $'. 
+
+diezMetros := 10*metros.
+sesentaPulgadas := 60*pulgadas.
+
+diezMetros  + sesentaPulgadas.
+
+"Construir los celcius y los farenheit en función de los Kelvin"
+
+kelvin := BaseUnit nameForOne: 'kelvin' nameForMany: 'kelvins'.
+
+"Acá estamos trabajando con medidas cuya relación no es proporcional por lo cual tenemos que utilizar otra clase. NotProportionalDerivedUnit nos permite definir unidades con conversiones arbitrarias. Debido a que ello debemos esta vez definir también la conversión recíproca."
+
+celcius := NotProportionalDerivedUnit baseUnit: kelvin conversionBlock: [:celcius | celcius + 273.15] reciprocalConversionBlock: [:kelvin | kelvin - 273.15] named: 'celcius'.
+
+farenheit := NotProportionalDerivedUnit baseUnit: kelvin conversionBlock: [:fahrenheit | fahrenheit -32 * 5 / 9 + 273.15] reciprocalConversionBlock: [:kelvin | kelvin - 273.15 * 9 / 5 + 32] named: 'fahrenheit'.
+
+30*kelvin + (20*celcius) + (10*farenheit). 584.0777777777778 * kelvin.
+
+"=== Fechas ==="
+5.1.
+
+DateAndTime fromSeconds: 0.Par
+
+(DateAndTime fromSeconds: 0) + (Duration days: 1).
+
+Time now.
+
+Time hour: 1 minute: 2 second: 4.
+
+Time now + (Duration hours: 1) “FALLA porque no es un timespan”
+
+(DateAndTime fromSeconds: 0) + (Duration days: 1).
+
+Date today.
+
+Date newDay: 1 month: 2 year: 3 .
+
+
+5.2
+
+FixedGregorianDate today.
+
+FixedGregorianDate today next next.
+
+GregorianDateTime now.
+
+GregorianDateTime now next.
+
+GregorianDateTime now next distanceFrom: GregorianDateTime now.
+
+(GregorianDateTime now next distanceFrom: GregorianDateTime now) convertTo: second /
+millisecond.
+
+TimeOfDay now.
+
+TimeOfDay now next: (30 * hour).
+
+FixedGregorianDate today year.
+
+FixedGregorianDate today month.
+
+FixedGregorianDate today monthOfYear.
+
+"""Obtener el dia dentro de una semana"""
+
+(FixedGregorianDate today) next: (24*7 * hour).
+
+5.3
+(FixedGregorianDate today) next: (24*second). """Que pasa?"""
+
+5.4
+(FixedGregorianDate today) next: (60*60*24*second). """Que pasa?"""
+
+5.5
+2024 isLeap.
+
+(April, 2024) year isLeap.
+""" No tiene sentido preguntarle a un número si es bisiesto"""
+
+5.6
+
+TimeOfDay now next: 3600*second
