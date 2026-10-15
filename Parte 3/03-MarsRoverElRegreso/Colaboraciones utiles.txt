@@ -1,14 +1,13 @@
-ITERACION 1:
 "NUEVO STREAM DE '''ESCRITURA''' "
 s := WriteStream on:''.
-s print: 'hola'; newLine.
-s print: 'chau'; newLine.
+s print: 1@2; newLine.
+s nextPutAll: 'chau'; newLine.
 
 "contents y vemos su contenido"
 s contents.
 
 "Con un stream de '''LECTURA''' podemos acceder linea por linea."
 r := ReadStream on: s contents.
-r nextLine. '''hola''' .
-r nextLine. '''chau''' .
+r nextLine. '1@2' .
+r nextLine. 'chau' .
 r atEnd. true .
